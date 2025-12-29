@@ -1,6 +1,6 @@
 
 from pathlib import Path
-
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-$g3xc(m*6-eh)mke=3bmnq__bfn!qaa5+!2-d%1s@sd-^hklij'
@@ -22,7 +22,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
+    
+    # CUSTOM PROJEECT APPS
     'HouseManagement',
+    'Profile',
+    
 
 ]
 
@@ -42,7 +48,7 @@ ROOT_URLCONF = 'Housemajor.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -114,6 +120,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
     ]
 }
 
@@ -131,3 +140,18 @@ JAZZMIN_SETTINGS = {
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
     "site_brand": "House Major ",
 }
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        # ...
+    ),
+}
+AUTH_USER_MODEL='Profile.CustomUser'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'housemajorrwanda@gmail.com'
+EMAIL_HOST_PASSWORD = 'kpxr khxv wjoy hprg'  # NOT your Gmail password!
+DEFAULT_FROM_EMAIL = 'House Major <housemajorrwanda@gmail.com>'

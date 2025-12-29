@@ -1,5 +1,7 @@
 from django.db import models
 import uuid
+from django.conf import settings
+from django.contrib.auth import get_user_model
 # Create your models here.
 class HouseCategory(models.Model):
     id=models.UUIDField(default=uuid.uuid4,editable=False,null=False,blank=False,primary_key=True,unique=True)
@@ -22,6 +24,18 @@ class AdditionalFeatures(models.Model):
     def __str__(self):
         return self.name
 # Hous Model
+class Agent(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    status = models.CharField(max_length=20,default='owner')
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20)
+    other_phone = models.CharField(max_length=20, blank=True, null=True)
+    upi = models.CharField(max_length=50, blank=True, null=True)
+    photo = models.ImageField(upload_to="agents/", blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 class House(models.Model):
     PAYMENT_CATEGORIES = (
         ('Rent', 'For Rent'),
@@ -38,6 +52,7 @@ class House(models.Model):
     price = models.IntegerField()
     description = models.TextField()
     is_booked=models.BooleanField(default=False)
+    agent = models.ForeignKey(to=Agent, on_delete=models.SET_NULL, null=True, blank=True, related_name='houses')
     house_features = models.ManyToManyField(
         to=AdditionalFeatures,
         through='HouseFeatureAssignment',
@@ -46,6 +61,12 @@ class House(models.Model):
 
     def __str__(self):
         return str(self.id)
+    def save(self, *args, **kwargs):
+        if self.agent is None:
+            User = get_user_model()
+            agent = User.objects.filter(is_staff=True).first()
+            self.agent = agent
+        super().save(*args, **kwargs)
 
 class HouseFeatureAssignment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,unique=True)
@@ -69,6 +90,7 @@ class HouseImages(models.Model):
 class Proximity(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False,unique=True)
     name=models.CharField(max_length=255)
+    icon=models.ImageField(upload_to='approximity_icon/',null=True,blank=True)
     latitude = models.DecimalField(max_digits=23, decimal_places=20, null=True, blank=True)
     longitude = models.DecimalField(max_digits=23, decimal_places=20, null=True, blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
